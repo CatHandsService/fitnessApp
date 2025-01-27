@@ -1,0 +1,44 @@
+{
+  "tabs": [
+    {
+      "key": "tab1",
+      "title": "Workout A",
+      "tasks": [
+        {
+          "id": "task1",
+          "label": "Bench Press",
+          "number1": 3,
+          "number2": 10,
+          "number3": 60
+        },
+        {
+          "id": "task2",
+          "label": "Squats",
+          "number1": 4,
+          "number2": 8,
+          "number3": 90
+        }
+      ]
+    },
+    {
+      "key": "tab2",
+      "title": "Workout B",
+      "tasks": [
+        {
+          "id": "task3",
+          "label": "Deadlift",
+          "number1": 3,
+          "number2": 5,
+          "number3": 120
+        },
+        {
+          "id": "task4",
+          "label": "Pull Ups",
+          "number1": 3,
+          "number2": 12,
+          "number3": 45
+        }
+      ]
+    }
+  ]
+}
