@@ -72,14 +72,6 @@ const TabComponent = ({
               </Pressable>
             </View>
           )}
-          {/* {isEditingTab === tab.id && (
-            <Pressable
-              onPress={() => deleteTab(tab.id)}
-              android_ripple={{ color: "#ffcdd2" }}
-            >
-              <Text style={styles.deleteTabText}>×</Text>
-            </Pressable>
-          )} */}
         </Pressable>
       ))}
 
