@@ -1,42 +1,59 @@
 {
   "tabs": [
     {
-      "key": "tab1",
+      "id": "tab1",
       "title": "Workout A",
       "tasks": [
         {
           "id": "task1",
+          "type": "training",
           "label": "Bench Press",
-          "number1": 3,
-          "number2": 10,
-          "number3": 60
+          "sets": 3,
+          "reps": 10,
+          "interval": 5,
+          "activeTab": ""
         },
         {
           "id": "task2",
+          "type": "interval",
+          "label": "Interval",
+          "sets": 1,
+          "reps": 1,
+          "interval": 5,
+          "activeTab": ""
+        },
+        {
+          "id": "task3",
+          "type": "training",
           "label": "Squats",
-          "number1": 4,
-          "number2": 8,
-          "number3": 90
+          "sets": 4,
+          "reps": 8,
+          "interval": 5,
+          "activeTab": ""
         }
       ]
     },
     {
-      "key": "tab2",
+      "id": "tab2",
       "title": "Workout B",
       "tasks": [
         {
           "id": "task3",
+          "type": "training",
           "label": "Deadlift",
-          "number1": 3,
-          "number2": 5,
-          "number3": 120
+          "sets": 3,
+          "reps": 5,
+          "interval": 120,
+          "activeTab": ""
         },
         {
           "id": "task4",
+          "type": "training",
           "label": "Pull Ups",
-          "number1": 3,
-          "number2": 12,
-          "number3": 45
+          "sets": 3,
+          "reps": 12,
+          "interval": 45,
+          "activeTab": ""
         }
       ]
     }

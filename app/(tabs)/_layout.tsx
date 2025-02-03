@@ -51,7 +51,7 @@ export default function TabLayout() {
             }
           },
           tabBarActiveTintColor: 'blue',
-          tabBarInactiveTintColor: 'gray',
+          tabBarInactiveTintColor: 'lightgray',
           headerShown: false,
         })}
       >

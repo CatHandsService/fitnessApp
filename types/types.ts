@@ -1,4 +1,3 @@
-// types.ts
 export type User = {
   uid: string;
   displayName: string | null;
@@ -13,22 +12,23 @@ export type Todo = {
 
 export type Tab = {
   id: string;
-  name: string;
+  title: string;
 };
 
 export interface WorkoutItem {
   type: 'training' | 'interval';
   id: string;
-  name: string;
+  label: string;
   sets: number;
   reps: number;
   interval: number;
-  tab: string;
+  activeTabId: string;
 }
 
 export interface TrainingComponentProps {
   id: string;
-  name: string;
+  type: 'training' | 'interval';
+  label: string;
   sets: number;
   reps: number;
   interval: number;
@@ -42,9 +42,15 @@ export interface TrainingComponentProps {
 
 export type TabComponentProps = {
   id: string;
-  name: string;
+  title: string;
   tabs: Tab[];
   setTabs: React.Dispatch<React.SetStateAction<Tab[]>>;
   activeTab: string;
   setActiveTab: (id: string) => void;
+};
+
+export type WorkoutData = {
+  id: string;
+  title: string;
+  tasks: WorkoutItem[];
 };

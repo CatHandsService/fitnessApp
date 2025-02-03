@@ -57,7 +57,7 @@ const RootLayout = () => {
     <PaperProvider>
       <SafeAreaProvider>
         <GestureHandlerRootView style={{ flex: 1 }}>
-          <Header />
+          {/* <Header /> */}
           <Stack screenOptions={{ headerShown: false }}>
             {user ? (
               <Stack.Screen name='(tabs)' />

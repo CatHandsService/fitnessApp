@@ -9,7 +9,8 @@ import { TrainingComponentProps } from '@/types/types';
 
 const TrainingComponent: React.FC<TrainingComponentProps> = ({
     id,
-    name,
+		type,
+    label,
     sets,
     reps,
     interval,
@@ -19,9 +20,11 @@ const TrainingComponent: React.FC<TrainingComponentProps> = ({
     onSelectedFieldChange,
     isDragging,
 		drag,
-}) => {
-    const handleUpdateValue = (field: string, value: number) => {
-        onUpdate(field, value);
+	}) => {
+    const handleUpdateValue = (field: string, value: number | string) => {
+        // Map 'name' to 'label' for consistency with workout.tsx
+        const mappedField = field === 'name' ? 'label' : field;
+        onUpdate(mappedField, value);
     };
 
     const handleCloseModal = () => {
@@ -29,77 +32,87 @@ const TrainingComponent: React.FC<TrainingComponentProps> = ({
     };
 
     return (
-        <View style={[styles.container, isDragging && styles.dragging]}>
-            <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-								<TouchableOpacity onLongPress={drag}>
-                    <MaterialIcons name="swap-vert" size={24} color="gray" />
-                </TouchableOpacity>
-                <View style={{ marginLeft: 16, marginRight: 8, flex: 1 }}>
-                    <View style={styles.trainingHeader}>
-                        <TextInput
-                            style={styles.input}
-                            value={name}
-                            onChangeText={(value) => onUpdate('name', value)}
-                            placeholder="Title"
-														maxLength={8}
-                        />
-                        <TouchableOpacity onPress={() => onRemoveItem()} style={styles.deleteButton}>
-                            <MaterialIcons name="close" size={24} color="gray" />
-                        </TouchableOpacity>
-                    </View>
-                    <View style={styles.trainingDetails}>
-												<TouchableOpacity
-													onPress={() => onSelectedFieldChange(`${id}-sets`)}
-													style={styles.settingWrapper}
-												>
-														<FontAwesome name="repeat" size={18} color="#444" />
-														<NumberPicker
-																value={sets}
-																onChange={(value) => handleUpdateValue('sets', value)}
-																label="Sets"
-																min={1}
-																max={20}
-																step={1}
-																onClose={handleCloseModal}
-																isVisible={selectedField === `${id}-sets`}
-														/>
-												</TouchableOpacity>
-												<TouchableOpacity
-													onPress={() => onSelectedFieldChange(`${id}-reps`)}
-													style={styles.settingWrapper}
-												>
-														<FontAwesome6 name="dumbbell" size={18} color="#444" />
-														<NumberPicker
-																value={reps}
-																onChange={(value) => handleUpdateValue('reps', value)}
-																label="Reps"
-																min={1}
-																max={20}
-																step={1}
-																onClose={handleCloseModal}
-																isVisible={selectedField === `${id}-reps`}
-														/>
-												</TouchableOpacity>
-                        <TouchableOpacity
-													onPress={() => onSelectedFieldChange(`${id}-interval`)}
-													style={styles.settingWrapper}
-												>
-														<Ionicons name="timer-outline" size={20} color="#444" />
-														<NumberPicker
-																value={interval}
-																onChange={(value) => handleUpdateValue('interval', value)}
-																label="Interval"
-																min={10}
-																max={600}
-																step={10}
-																onClose={handleCloseModal}
-																isVisible={selectedField === `${id}-interval`}
-														/>
-												</TouchableOpacity>
-                    </View>
-                </View>
-            </View>
-        </View>
+			<View style={[styles.container, isDragging && styles.dragging]}>
+				<View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+					<TouchableOpacity onLongPress={drag}>
+						<MaterialIcons name="swap-vert" size={24} color="gray" />
+					</TouchableOpacity>
+
+					<View style={{ marginLeft: 16, marginRight: 8, flex: 1 }}>
+						<View style={styles.trainingHeader}>
+							<TextInput
+								style={styles.input}
+								value={type === 'interval' ? 'Interval' : label}
+								onChangeText={(value) => handleUpdateValue('name', value)}
+								placeholder="Title"
+								maxLength={18}
+								editable={type !== 'interval'}
+							/>
+
+							<TouchableOpacity onPress={() => onRemoveItem()} style={styles.deleteButton}>
+								<MaterialIcons name="close" size={24} color="gray" />
+							</TouchableOpacity>
+						</View>
+
+						<View style={styles.trainingDetails}>
+							{type === 'training' &&
+								<TouchableOpacity
+									onPress={() => onSelectedFieldChange(`${id}-sets`)}
+									style={styles.settingWrapper}
+								>
+									<FontAwesome name="repeat" size={18} color="#444" />
+									<NumberPicker
+										value={sets}
+										onChange={(value) => handleUpdateValue('sets', value)}
+										label="Sets"
+										min={1}
+										max={20}
+										step={1}
+										onClose={handleCloseModal}
+										isVisible={selectedField === `${id}-sets`}
+									/>
+								</TouchableOpacity>
+							}
+
+							{type === 'training' &&
+								<TouchableOpacity
+									onPress={() => onSelectedFieldChange(`${id}-reps`)}
+									style={styles.settingWrapper}
+								>
+									<FontAwesome6 name="dumbbell" size={18} color="#444" />
+									<NumberPicker
+										value={reps}
+										onChange={(value) => handleUpdateValue('reps', value)}
+										label="Reps"
+										min={1}
+										max={20}
+										step={1}
+										onClose={handleCloseModal}
+										isVisible={selectedField === `${id}-reps`}
+									/>
+								</TouchableOpacity>
+							}
+
+							<TouchableOpacity
+								onPress={() => onSelectedFieldChange(`${id}-interval`)}
+								style={styles.settingWrapper}
+							>
+								<Ionicons name="timer-outline" size={20} color="#444" />
+								<NumberPicker
+									value={interval}
+									onChange={(value) => handleUpdateValue('interval', value)}
+									label="Interval"
+									min={10}
+									max={600}
+									step={10}
+									onClose={handleCloseModal}
+									isVisible={selectedField === `${id}-interval`}
+								/>
+							</TouchableOpacity>
+						</View>
+					</View>
+				</View>
+			</View>
     );
 };
 
@@ -107,46 +120,46 @@ export default TrainingComponent;
 
 const styles = StyleSheet.create({
 	container: {
-			borderWidth: 1,
-			borderColor: '#ccc',
-			borderRadius: 8,
-			backgroundColor: '#fff',
-			padding: 10,
-			margin: 10,
-			marginBottom: 0
+		borderWidth: 1,
+		borderColor: '#ccc',
+		borderRadius: 5,
+		backgroundColor: '#fff',
+		padding: 10,
+		margin: 10,
+		marginBottom: 0
 	},
 	dragging: {
-			transform: [{ scale: .9 }],
-			shadowColor: "#000",
-			shadowOffset: {
-					width: 0,
-					height: 4,
-			},
-			shadowOpacity: 0.3,
-			shadowRadius: 4.65,
-			elevation: 8,
+		transform: [{ scale: .9 }],
+		shadowColor: "#000",
+		shadowOffset: {
+			width: 0,
+			height: 4,
+		},
+		shadowOpacity: 0.3,
+		shadowRadius: 4.65,
+		elevation: 8,
 	},
 	trainingHeader: {
-			marginBottom: 8,
-			flexDirection: 'row',
-			justifyContent: 'space-between',
-			alignItems: 'center',
+		marginBottom: 8,
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		alignItems: 'center',
 	},
 	trainingDetails: {
-			marginLeft: 8,
-			flexDirection: 'row',
-			justifyContent: 'space-between',
-			alignItems: 'center',
+		marginLeft: 8,
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		alignItems: 'center',
 	},
 	input: {
-			fontSize: 20,
-			fontWeight: 'bold',
-			padding: 8,
-			width: '80%',
+		fontSize: 20,
+		fontWeight: 'bold',
+		// padding: 8,
+		width: '80%',
 	},
 	deleteButton: {
-			width: 40,
-			padding: 8,
+		// width: 40,
+		// padding: 8,
 	},
 	settingWrapper: {
 		display: 'flex',
