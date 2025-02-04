@@ -6,6 +6,8 @@ import { db } from '../services/firebase';
 import { Tab, TabComponentProps } from "@/types/types";
 import ClearOutlinedIcon from '@mui/icons-material/ClearOutlined';
 
+const MAX_TABS = 6;
+
 const updateTabsInFirebase = async (tabs: Tab[]) => {
   try {
     const userDocRef = doc(db, 'users', "9IDymBk1BGEWl6Tvpqo6");
@@ -21,7 +23,6 @@ const updateTabsInFirebase = async (tabs: Tab[]) => {
     const workoutDocRef = workoutDocs.docs[0].ref;
     const currentData = workoutDocs.docs[0].data();
 
-    // Update tabs while preserving other document data
     await updateDoc(workoutDocRef, {
       ...currentData,
       tabs: tabs.map(tab => ({
@@ -35,16 +36,17 @@ const updateTabsInFirebase = async (tabs: Tab[]) => {
   }
 };
 
-const TabComponent = ({
+const TabComponent: React.FC<TabComponentProps> = ({
   tabs,
   setTabs,
   activeTab,
   setActiveTab,
-}: TabComponentProps) => {
+  onTabPress,
+}) => {
   const [isEditingTab, setIsEditingTab] = useState<string | null>(null);
 
   const addTab = useCallback(() => {
-    if (tabs.length >= 3) return;
+    if (tabs.length >= MAX_TABS) return;
 
     const newTab: Tab = {
       id: uuidv4(),
@@ -55,7 +57,6 @@ const TabComponent = ({
     setTabs(updatedTabs);
     setActiveTab(newTab.id);
 
-    // Sync with Firebase
     updateTabsInFirebase(updatedTabs);
   }, [tabs, setTabs, setActiveTab]);
 
@@ -64,7 +65,6 @@ const TabComponent = ({
     setTabs(updatedTabs);
     setActiveTab(updatedTabs[0]?.id);
 
-    // Sync with Firebase
     updateTabsInFirebase(updatedTabs);
   }, [tabs, setTabs, setActiveTab]);
 
@@ -75,11 +75,9 @@ const TabComponent = ({
 
     setTabs(updatedTabs);
 
-    // Sync with Firebase
     updateTabsInFirebase(updatedTabs);
   }, [tabs, setTabs]);
 
-  // Rest of the component remains similar to the original implementation
   return (
     <View style={styles.tabContainer}>
       {tabs.map((tab) => (
@@ -90,7 +88,7 @@ const TabComponent = ({
             activeTab === tab.id && styles.activeTab,
             isEditingTab === tab.id && styles.activeInput,
           ]}
-          onPress={() => setActiveTab(tab.id)}
+          onPress={() => {setActiveTab(tab.id); onTabPress(tab)}}
           onLongPress={() => {setIsEditingTab(tab.id); setActiveTab(tab.id);}}
           android_ripple={{ color: "#bbdefb" }}
         >
@@ -119,14 +117,16 @@ const TabComponent = ({
         </Pressable>
       ))}
 
-      {tabs.length < 3 && (
-        <Pressable
-          style={styles.addTabButton}
-          onPress={addTab}
-          android_ripple={{ color: "#81c784" }}
-        >
-          <Text style={styles.addTabText}>+</Text>
-        </Pressable>
+      {tabs.length < MAX_TABS && (
+        <View style={{ width: "48%", aspectRatio: "1 / 1", justifyContent: "center", alignItems: "center" }}>
+          <Pressable
+            style={styles.addTabButton}
+            onPress={addTab}
+            android_ripple={{ color: "#81c784" }}
+          >
+            <Text style={styles.addTabText}>+</Text>
+          </Pressable>
+        </View>
       )}
     </View>
   );
@@ -139,15 +139,18 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: 'space-between',
     alignItems: "center",
+    flexWrap: "wrap",
     marginInline: 10,
     marginTop: 10,
     padding: 5,
     backgroundColor: "#e0e0e0",
     borderRadius: 5,
-    gap: 5,
+    gap: 10,
   },
   tab: {
-    flexGrow: 1,
+    maxWidth: "48%",
+    width: "48%",
+    aspectRatio: "1 / 1",
     padding: 10,
     backgroundColor: "#e0e0e0",
     display: "flex",
@@ -162,9 +165,14 @@ const styles = StyleSheet.create({
     padding: 0,
   },
   addTabButton: {
+    width: 40,
+    aspectRatio: "1 / 1",
     padding: 10,
     backgroundColor: "#4CAF50",
-    borderRadius: 5,
+    borderRadius: 50,
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
   },
   addTabText: {
     color: "#fff",

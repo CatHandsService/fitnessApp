@@ -22,7 +22,6 @@ const TrainingComponent: React.FC<TrainingComponentProps> = ({
 		drag,
 	}) => {
     const handleUpdateValue = (field: string, value: number | string) => {
-        // Map 'name' to 'label' for consistency with workout.tsx
         const mappedField = field === 'name' ? 'label' : field;
         onUpdate(mappedField, value);
     };

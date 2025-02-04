@@ -47,6 +47,7 @@ export type TabComponentProps = {
   setTabs: React.Dispatch<React.SetStateAction<Tab[]>>;
   activeTab: string;
   setActiveTab: (id: string) => void;
+  onTabPress: (tab: Tab) => void;
 };
 
 export type WorkoutData = {
