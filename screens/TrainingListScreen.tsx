@@ -26,14 +26,18 @@ import TrainingComponent from '@/components/TrainingComponent';
 import { Action, workoutReducer } from '@/reducers/workoutReducer';
 import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '@/types/navigationTypes';
-import { fetchWorkoutData } from '@/services/firebaseService';
+import { addWorkoutItemToFirebase, deleteWorkoutItemFromFirebase, fetchWorkoutData, updateWorkoutItemInFirebase } from '@/services/firebaseService';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useColorScheme } from 'react-native';
+import { useTheme } from '@/hooks/ThemeContext';
+
+const theme  = useTheme();
 
 type TrainingListScreenRouteProp = RouteProp<RootStackParamList, 'TrainingList'>;
 
 interface TrainingListScreenProps {
   route: TrainingListScreenRouteProp;
-}
+};
 
 const TrainingListScreen: React.FC<TrainingListScreenProps> = ({ route }) => {
   const { tabId } = route.params || {};
@@ -46,6 +50,7 @@ const TrainingListScreen: React.FC<TrainingListScreenProps> = ({ route }) => {
   const timerStartIconAnimation = useSharedValue(0);
   const dragRef = useRef(null);
   const navigation = useNavigation();
+  const [tabTitle, setTabTitle] = useState<string>('');
 
 	const goBack = () => {
     console.log(navigation)
@@ -56,11 +61,13 @@ const TrainingListScreen: React.FC<TrainingListScreenProps> = ({ route }) => {
     const fetchWorkout = async () => {
       try {
         if (!tabId) {
-          console.error("Tab ID is not defined");
+          console.error("Tab ID is not defined, navigating to TabListScreen");
+					navigation.navigate('TabList' as never);
           return;
         }
-        const workoutItems = await fetchWorkoutData(tabId);
+        const { workoutItems, tabTitle: fetchedTabTitle } = await fetchWorkoutData(tabId);
         dispatch({ type: 'REORDER_ITEMS', items: workoutItems });
+				setTabTitle(fetchedTabTitle);
       } catch (error) {
         console.error('Error fetching workout data:', error);
       }
@@ -68,8 +75,7 @@ const TrainingListScreen: React.FC<TrainingListScreenProps> = ({ route }) => {
     fetchWorkout();
   }, [tabId, dispatch]);
 
-  // Function to add new workout item
-  const handleAddTraining = useCallback(() => {
+  const handleAddTraining = useCallback(async () => {
     if (!tabId) {
       console.error("Tab ID is not defined");
       return;
@@ -84,14 +90,18 @@ const TrainingListScreen: React.FC<TrainingListScreenProps> = ({ route }) => {
       interval: 60,
       activeTabId: tabId as string,
     };
-
+    await addWorkoutItemToFirebase(newItem)
     dispatch({ type: 'ADD_ITEM', payload: newItem });
     animatedValue.value = withTiming(1, { duration: 300 });
     hideMenu();
   }, [tabId, dispatch, animatedValue]);
 
-  // Function to add new interval item
-  const handleAddInterval = useCallback(() => {
+  const handleAddInterval = useCallback(async () => {
+    if (!tabId) {
+      console.error("Tab ID is not defined");
+      return;
+    }
+
     const newItem: WorkoutItem = {
       id: uuidv4(),
       type: 'interval',
@@ -101,21 +111,31 @@ const TrainingListScreen: React.FC<TrainingListScreenProps> = ({ route }) => {
       interval: 60,
       activeTabId: tabId as string,
     };
-
+      await addWorkoutItemToFirebase(newItem)
     dispatch({ type: 'ADD_ITEM', payload: newItem });
     animatedValue.value = withTiming(1, { duration: 300 });
     hideMenu();
   }, [tabId, dispatch, animatedValue]);
 
-  // Function to handle item removal
-  const handleRemoveItem = useCallback((id: string) => {
+  const handleRemoveItem = useCallback(async (id: string) => {
+    const itemToDelete = workout.find(item => item.id === id);
+    if (itemToDelete) {
+      await deleteWorkoutItemFromFirebase(itemToDelete);
+    }
     dispatch({ type: 'REMOVE_ITEM', id });
   }, [dispatch]);
 
-  // Function to handle item updates
-  const handleUpdateItem = useCallback((id: string, field: string, value: string | number) => {
-    dispatch({ type: 'UPDATE_ITEM', id, field, value });
-  }, [dispatch]);
+  const handleUpdateItem = useCallback(async (id: string, field: string, value: string | number) => {
+    const updatedItem = workout.find(item => item.id === id);
+    if(updatedItem){
+      const updatedWorkoutItem:WorkoutItem = {
+        ...updatedItem,
+        [field]:value,
+      }
+      await updateWorkoutItemInFirebase(updatedWorkoutItem);
+      dispatch({ type: 'UPDATE_ITEM', id, field, value });
+    }
+  }, [dispatch,workout]);
 
   // Function to handle item reordering
   const handleDragEnd = useCallback(({ data }: { data: WorkoutItem[] }) => {
@@ -187,7 +207,7 @@ const TrainingListScreen: React.FC<TrainingListScreenProps> = ({ route }) => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>{tabId}</Text>
+        <Text style={styles.headerTitle}>{tabTitle}</Text>
 			</View>
 
       <View style={styles.backButtonContainer}>
@@ -246,14 +266,14 @@ const TrainingListScreen: React.FC<TrainingListScreenProps> = ({ route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#ddd',
   },
   header: {
     height: 60,
 		alignItems: 'center',
     justifyContent: 'center',
 		paddingHorizontal: 10,
-		backgroundColor: '#f0f0f0',
+    backgroundColor: '#ddd',
 	},
   headerTitle: {
     fontSize: 30,
@@ -288,7 +308,7 @@ const styles = StyleSheet.create({
 	},
 	backButtonIcon: {
 		fontSize: 30,
-		color: '#fff',
+    color: '#444'
 	},
 
   listContainer: {
@@ -318,7 +338,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 20,
     right: 20,
-    color: '#fff',
+    color: '#444',
     display: 'flex',
     justifyContent: 'flex-end',
     alignItems: 'center',
@@ -352,7 +372,7 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   icon: {
-    color: '#fff',
+    color: '#444',
   },
   listFooter: {
     height: 107,

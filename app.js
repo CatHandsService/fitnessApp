@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { SplashScreen } from 'expo-router';
+import {  SplashScreen } from 'expo-router';
 import { firebase } from './services/firebase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFonts } from 'expo-font';
-import 'react-native-gesture-handler';
-import 'react-native-reanimated';
+import { DarkTheme, DefaultTheme, useColorScheme } from 'react-native';
+import { useRouter } from 'expo-router';
+import ThemeContext from './components/themeContext';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -14,8 +15,7 @@ export default function App() {
   const [fontsLoaded] = useFonts({
     'Roboto-Regular': require('./assets/fonts/Roboto-Regular.ttf'),
     'Roboto-Medium': require('./assets/fonts/Roboto-Medium.ttf'),
-   });
-
+  });
 
   useEffect(() => {
     const checkAutoLogin = async () => {
@@ -42,21 +42,48 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-      if (fontsLoaded) {
-        SplashScreen.hideAsync();
-      }
+    if (fontsLoaded) {
+      SplashScreen.hideAsync();
+    }
   }, [fontsLoaded]);
 
-    if (!fontsLoaded || loading) {
-      return null;
-    }
+  if (!fontsLoaded || loading) {
+  return null; // Or a loading screen
+  };
+
+  const systemColorScheme = useColorScheme();
+  const [theme, setTheme] = useState(systemColorScheme || 'light');
+  useEffect(() => {
+    const loadTheme = async () => {
+      try {
+        const storedTheme = await AsyncStorage.getItem('theme');
+        if (storedTheme) {
+          setTheme(storedTheme);
+        }
+      } catch (error) {
+        console.error("Error loading theme", error);
+      }
+    };
+
+    loadTheme();
+  }, []);
+
+  const toggleTheme = useCallback(() => {
+    setTheme(prevTheme => {
+      const newTheme = prevTheme === 'light' ? 'dark' : 'light';
+      AsyncStorage.setItem('theme', newTheme);
+      return newTheme;
+    });
+  }, []);
+
+  const themeValue = useMemo(() => ({ theme, toggleTheme }), [theme, toggleTheme]);
 
   return (
-    <RootNavigation user={user}/>
+    <ThemeContext.Provider value={themeValue}>
+      <RootNavigation user={user}/>
+    </ThemeContext.Provider>
   );
-}
-
-import { useRouter } from 'expo-router';
+};
 
 function RootNavigation({user}){
   const router = useRouter()
@@ -70,4 +97,4 @@ function RootNavigation({user}){
   },[user])
 
   return null
-}
+};

@@ -118,7 +118,7 @@ const TabComponent: React.FC<TabComponentProps> = ({
       ))}
 
       {tabs.length < MAX_TABS && (
-        <View style={{ width: "48%", aspectRatio: "1 / 1", justifyContent: "center", alignItems: "center" }}>
+        <View style={{ width: "47.5%", aspectRatio: "1 / 1", justifyContent: "center", alignItems: "center" }}>
           <Pressable
             style={styles.addTabButton}
             onPress={addTab}
@@ -140,16 +140,15 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: "center",
     flexWrap: "wrap",
+    width: '100%',
     marginInline: 10,
     marginTop: 10,
-    padding: 5,
     backgroundColor: "#e0e0e0",
     borderRadius: 5,
     gap: 10,
   },
   tab: {
-    maxWidth: "48%",
-    width: "48%",
+    width: "47.5%",
     aspectRatio: "1 / 1",
     padding: 10,
     backgroundColor: "#e0e0e0",

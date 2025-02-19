@@ -7,7 +7,7 @@ const userCol = process.env.REACT_APP_FIREBASE_USER_COLLECTION || 'users';
 const userDocument = process.env.REACT_APP_FIREBASE_USER_DOCUMENT || '9IDymBk1BGEWl6Tvpqo6';
 const workoutsSubCol = process.env.REACT_APP_FIREBASE_WORKOUTS_SUBCOLLECTION || 'workouts';
 
-export const fetchWorkoutData = async (tabId: string): Promise<WorkoutItem[]> => {
+export const fetchWorkoutData = async (tabId: string): Promise<{ workoutItems: WorkoutItem[]; tabTitle: string }> => {
   try {
     const userDocRef = doc(db, userCol, userDocument);
     const workoutsRef = collection(userDocRef, workoutsSubCol);
@@ -15,15 +15,20 @@ export const fetchWorkoutData = async (tabId: string): Promise<WorkoutItem[]> =>
 
     if (querySnapshot.empty) {
       console.error('No workout data found');
-      return [];
+      return { workoutItems: [], tabTitle: '' };
     }
 
     const workoutData = querySnapshot.docs[0].data();
+    console.log(workoutData);
+
     const tab = workoutData.tabs.find((t: any) => t.id === tabId);
-    return tab ? tab.tasks : [];
+    const workoutItems = tab ? tab.tasks : [];
+    const tabTitle = tab ? tab.title : '';
+
+    return { workoutItems, tabTitle };
   } catch (error) {
     console.error('Error fetching workout data:', error);
-    return [];
+    return { workoutItems: [], tabTitle: '' };
   }
 };
 
